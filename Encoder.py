@@ -56,6 +56,67 @@ Class Encoder
             Write (tuple.toString() + “\n”)
 
         endfor
+"""
+class Encoder(object):
+    
+    def __init__(self, length, input):
+        
+        self.parsed = [] #data parsed from raw
+        self.numbered = [] #data replaced with dictionary indices
+        self.l = int(length) #Length arg
+
+        f = open(input)
+        self.raw = f.read() #Raw, unparsed data read from file
+        
+    def segment(self):
+        """
+        Decided to handle reading the file in the constructor
+        Each Encoder handles one input file
+        This varies from initial pseudocode since Segmentator doesn't quite match it
+
+        """
+
+        #splits raw input by non-unicode words using regex
+        tokens = re.split('(\W)', self.raw)
+        
+        #count and remove blank values left over by regex
+        tokens = filter(lambda a: a != 2, x)
+        
+        '''
+        Read tokens
+            If token is small enough
+                add token to dict
+            else 
+                slice token into smaller tokens and add them to legend
+        '''
+        for token in tokens:
+            if len(token) < self.l:
+                self.parsed.append(token)
+            else:
+                while len(token) > self.l:
+                    self.parsed.append(token[:self.l]) #append multiple of l
+                    token = token[self.l:]
+                    if len(token) < self.l:
+                        if len(token) != 0: #filter out empty slices
+                            self.parsed.append(token)
+        
+        return self.parsed
+    
+    def encode(self):
+        
+        dictionary = []
+        
+        for e in self.parsed:
+            try: #See if it's already in our dictionary. Exception if it's not
+                index = dictionary.index(e)
+            except ValueError: #If not in dictionary, add it
+                dictionary.append(e)
+                
+            self.numbered.append(dictionary.index(e) + 1)
+        
+        return self.numbered
+"""
+
 
     string output(list input)
         Use the input list to produce output similar to the output table in example
@@ -72,6 +133,8 @@ class Priority_Dict(object):
     def __init__(self):
         self.legend = [] #Don't reorder this one. It's our original legend
         self.numbered = "" #This holds the number conversion of the string
+        self.reorderable_legend = [] #This will be the reordering list used to construct the 
+        self.output = ""    #This will represent the output string of ints
     
     def add_segment(self, segment):
         """
@@ -81,6 +144,8 @@ class Priority_Dict(object):
         Then add the index of whatever was just found (or not found) to the self.numbered
         """
 
+        index = 0
+
         for pair in self.legend:
             try: #See if it's already in our dictionary. Exception if it's not.
                 index = self.legend.index(pair)
@@ -89,6 +154,7 @@ class Priority_Dict(object):
                 
             self.numbered.append(legend.index(pair)) + 1)
         
+        return index
 
     def lookup(self, key):
         """
