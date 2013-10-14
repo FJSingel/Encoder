@@ -5,19 +5,20 @@ import sys
 
 class Encoder(object):
     
-    def __init__(self, length, input):
+    def __init__(self, length, input, output):
         
         self.l = int(length) #Length arg cast into an int
         self.legend = PriorityDict() #stores all processed data
 
         f = open(input)
         self.raw = f.read() #Raw, unparsed data read from file
+
+        self.output_file = output
         
     def segment(self):
         """
         Decided to handle reading the file in the constructor
         Each Encoder handles one input file and tokenizes the input by non-alphanumeric characters
-        This varies from initial pseudocode since Segmentator doesn't quite match it
         """
 
         #splits raw input by non-unicode words using regex
@@ -49,11 +50,31 @@ class Encoder(object):
             Write tuple to output
         endfor
         '''
+        self._write_results(self.legend)
 
         print self.legend.legend
         print self.legend.numbered
         print self.legend.output
         print self.legend.reorderable_legend
+
+    def _write_results(self, legend):
+        """
+        Given PriorityDict, it writes the legend and encoded string to an output file
+        """
+        target = open(self.output_file, 'w')
+        target.write("Input:  ")
+        for value in legend.numbered:
+            target.write(str(value) + " ")
+
+        target.write("\nOutput: ")
+        for value in legend.output:
+            target.write(str(value) + " ")
+
+        target.write("\n\nLegend\n")
+        for pair in legend.legend:
+            target.write(str(pair) + "\n")
+
+        target.close()
 
 class PriorityDict(object):
     """
