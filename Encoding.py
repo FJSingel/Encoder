@@ -6,7 +6,7 @@ FJS52@case.edu
 
 This Module segments and stores a string in a custom ordered dictionary
 """
-
+from math import ceil
 import re
 
 class Encoder(object):
@@ -14,13 +14,15 @@ class Encoder(object):
     def __init__(self, length, input):
         
         try:
-            self.l = int(length) #Length arg cast into an int
+            self.l = int(ceil(length)) #Length arg cast into an int
             if (self.l < 1):
                 raise ValueError
         except ValueError:
-            print "Error: Invalid segment length specified. Exiting\n"
+            print "Error: Invalid segment length specified. Exiting"
             raise ValueError
-            
+        except TypeError:
+            print "Error: Invalid segment length specified. Exiting"
+            raise TypeError
 
         self.legend = PriorityDict() #stores all processed data
 
@@ -69,13 +71,6 @@ class Encoder(object):
         endfor
 
         self._write_results(self.legend)
-        '''
-
-        '''
-        print self.legend.legend
-        print self.legend.numbered
-        print self.legend.output
-        print self.legend.reorderable_legend
         '''
 
     def write_results(self, output_file):
