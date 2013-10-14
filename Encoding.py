@@ -17,9 +17,9 @@ class Encoder(object):
             self.l = int(length) #Length arg cast into an int
             if (self.l < 1):
                 raise ValueError
-        except ValueError, TypeError:
+        except ValueError:
             print "Error: Invalid segment length specified. Exiting\n"
-            sys.exit(0)
+            raise ValueError
             
 
         self.legend = PriorityDict() #stores all processed data
@@ -29,7 +29,7 @@ class Encoder(object):
             self.raw = f.read() #Raw, unparsed data read from file
         except IOError, e:
             print "Error: File not found. Exiting\n", e
-            sys.exit(0)
+            raise e
         
     def segment(self):
         """
@@ -62,6 +62,7 @@ class Encoder(object):
                             self.legend.add_segment(token)
         '''
         --MOVED INTO SEPERATE METHOD--
+        --Why make file writing mandatory?--
         Produce output here
         For each tuple in legend
             Write tuple to output
@@ -80,6 +81,12 @@ class Encoder(object):
     def write_results(self, output_file):
         """
         Given PriorityDict, it writes the legend and encoded string to an output file
+
+        Write Output
+        Write Legend
+        For each tuple in legend
+            Write tuple to output
+        endfor
         """
         try:
             target = open(output_file, 'w')
@@ -109,7 +116,7 @@ class PriorityDict(object):
     def __init__(self):
         self.legend = [] #Don't reorder this one. It's our original legend
         self.numbered = [] #This holds the number conversion of the string
-        self.reorderable_legend = [] #This will be the reordering list used to construct the 
+        self.reorderable_legend = [] #This will be the reordering list used to construct the output
         self.output = []    #This will represent the output string of ints
     
     def add_segment(self, segment):
@@ -118,17 +125,17 @@ class PriorityDict(object):
         Search in tuple list for segment from front of list to back and return key
         If not found, append it as a new (int, string) tuple to the end of legend
         Then add the index of whatever was just found (or not found) to the self.numbered
+        Move whatever was accessed to the front of reorderable_legend
         """
 
         index = self._lookup(self.legend, segment)
 
-        if(index == len(self.legend)): #if it's not in there, add it
+        if(index == len(self.reorderable_legend)): #if it's not in there, add it
             self.legend.append((index+1, segment))
             self.reorderable_legend.append((index+1, segment))
 
         self.output.append(self._lookup(self.reorderable_legend, segment))
-        self._prioritize(segment) #move tuple to front of dict
-        print ("{}:{}".format(segment, self.reorderable_legend))
+        self._prioritize(segment) #move tuple to front of list
         self.numbered.append(index+1)
         
         return index
