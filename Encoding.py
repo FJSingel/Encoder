@@ -1,11 +1,17 @@
-#import regexes and cmd inputs
-import fileinput
+"""
+Created on Oct 12, 2013
+
+@author: Frank Singel
+FJS52@case.edu
+
+This Module segments and stores a string in a custom ordered dictionary
+"""
+
 import re
-import sys
 
 class Encoder(object):
     
-    def __init__(self, length, input, output):
+    def __init__(self, length, input):
         
         try:
             self.l = int(length) #Length arg cast into an int
@@ -24,9 +30,6 @@ class Encoder(object):
         except IOError, e:
             print "Error: File not found. Exiting\n", e
             sys.exit(0)
-            
-
-        self.output_file = output
         
     def segment(self):
         """
@@ -58,34 +61,38 @@ class Encoder(object):
                         if len(token) != 0: #ignore empty slices
                             self.legend.add_segment(token)
         '''
+        --MOVED INTO SEPERATE METHOD--
         Produce output here
         For each tuple in legend
             Write tuple to output
         endfor
-        '''
-        self._write_results(self.legend)
 
+        self._write_results(self.legend)
+        '''
+
+        '''
         print self.legend.legend
         print self.legend.numbered
         print self.legend.output
         print self.legend.reorderable_legend
+        '''
 
-    def _write_results(self, legend):
+    def write_results(self, output_file):
         """
         Given PriorityDict, it writes the legend and encoded string to an output file
         """
         try:
-            target = open(self.output_file, 'w')
+            target = open(output_file, 'w')
             target.write("Input:  ")
-            for value in legend.numbered:
+            for value in self.legend.numbered:
                 target.write(str(value) + " ")
 
             target.write("\nOutput: ")
-            for value in legend.output:
+            for value in self.legend.output:
                 target.write(str(value) + " ")
 
             target.write("\n\nLegend\n")
-            for pair in legend.legend:
+            for pair in self.legend.legend:
                 target.write(str(pair) + "\n")
         except IOError, e:
             print "IOError while writing output."
