@@ -68,7 +68,7 @@ class MoreInput(TestCase):
 
 class MuchInput(TestCase):
     """
-    Tries to compress the first book of 'Heart of Darkness'
+    Tries to compress a large excerpt from 'Heart of Darkness'
     """
     @class_setup
     def setUp(self):

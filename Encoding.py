@@ -38,20 +38,20 @@ class Encoder(object):
         Decided to handle reading the file in the constructor
         Each Encoder handles one input file and tokenizes the input by non-alphanumeric characters
         """
+        '''
+        Read tokens
+            If token is small enough
+                add token to legend
+            else 
+                slice token into smaller tokens and add them to legend
+        '''
 
         #splits raw input by non-unicode words using regex
         tokens = re.split('(\W)', self.raw)
         
         #count and remove blank values left over by regex
         tokens = filter(lambda a: a != "", tokens)
-        
-        '''
-        Read tokens
-            If token is small enough
-                add token to dict
-            else 
-                slice token into smaller tokens and add them to legend
-        '''
+
         for token in tokens:
             if len(token) < self.l: #If token is small enough
                 self.legend.add_segment(token)
@@ -62,16 +62,6 @@ class Encoder(object):
                     if len(token) < self.l:
                         if len(token) != 0: #ignore empty slices
                             self.legend.add_segment(token)
-        '''
-        --MOVED INTO SEPERATE METHOD--
-        --Why make file writing mandatory?--
-        Produce output here
-        For each tuple in legend
-            Write tuple to output
-        endfor
-
-        self._write_results(self.legend)
-        '''
 
     def write_results(self, output_file):
         """
