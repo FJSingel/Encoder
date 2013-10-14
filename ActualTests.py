@@ -72,7 +72,15 @@ class MuchInput(TestCase):
     """
     @class_setup
     def setUp(self):
-        os.remove("./HeartOutput.txt")
+        try: #remove old output files if found
+        	os.remove("./HeartOutput.txt")
+        except OSError:
+        	pass
+
+    def test_more_input(self):
+    	segment = Encoding.Encoder(3, "Excerpt.txt")
+        segment.segment()
+        segment.write_results("HeartOutput.txt")
 
     def tearDown(self):
         pass
