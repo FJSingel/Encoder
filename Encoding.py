@@ -7,11 +7,24 @@ class Encoder(object):
     
     def __init__(self, length, input, output):
         
-        self.l = int(length) #Length arg cast into an int
+        try:
+            self.l = int(length) #Length arg cast into an int
+            if (self.l < 1):
+                raise ValueError
+        except ValueError, TypeError:
+            print "Error: Invalid segment length specified. Exiting\n"
+            sys.exit(0)
+            
+
         self.legend = PriorityDict() #stores all processed data
 
-        f = open(input)
-        self.raw = f.read() #Raw, unparsed data read from file
+        try:
+            f = open(input)
+            self.raw = f.read() #Raw, unparsed data read from file
+        except IOError, e:
+            print "Error: File not found. Exiting\n", e
+            sys.exit(0)
+            
 
         self.output_file = output
         
@@ -61,20 +74,24 @@ class Encoder(object):
         """
         Given PriorityDict, it writes the legend and encoded string to an output file
         """
-        target = open(self.output_file, 'w')
-        target.write("Input:  ")
-        for value in legend.numbered:
-            target.write(str(value) + " ")
+        try:
+            target = open(self.output_file, 'w')
+            target.write("Input:  ")
+            for value in legend.numbered:
+                target.write(str(value) + " ")
 
-        target.write("\nOutput: ")
-        for value in legend.output:
-            target.write(str(value) + " ")
+            target.write("\nOutput: ")
+            for value in legend.output:
+                target.write(str(value) + " ")
 
-        target.write("\n\nLegend\n")
-        for pair in legend.legend:
-            target.write(str(pair) + "\n")
-
-        target.close()
+            target.write("\n\nLegend\n")
+            for pair in legend.legend:
+                target.write(str(pair) + "\n")
+        except IOError, e:
+            print "IOError while writing output."
+            raise e
+        else:
+            target.close()
 
 class PriorityDict(object):
     """

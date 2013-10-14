@@ -1,12 +1,10 @@
 #import regexes and cmd inputs
-import fileinput
 import re
-import sys
 
 import Encoding
 
-dictio = Encoding.PriorityDict()
-
-#Makes segment object with 2 cmd line args
 segment = Encoding.Encoder(3, "Input", "Output")
-segment.segment() #Sets
+segment.segment()
+
+bad_segment = Encoding.Encoder('a', "aklfda", "Output2")
+bad_segment.segment()
