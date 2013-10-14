@@ -7,10 +7,8 @@ class Encoder(object):
     
     def __init__(self, length, input):
         
-        self.parsed = [] #data parsed from raw
-        self.numbered = [] #data replaced with dictionary indices
-        self.l = int(length) #Length arg
-        self.legend = PriorityDict()
+        self.l = int(length) #Length arg cast into an int
+        self.legend = PriorityDict() #stores all processed data
 
         f = open(input)
         self.raw = f.read() #Raw, unparsed data read from file
@@ -18,7 +16,7 @@ class Encoder(object):
     def segment(self):
         """
         Decided to handle reading the file in the constructor
-        Each Encoder handles one input file
+        Each Encoder handles one input file and tokenizes the input by non-alphanumeric characters
         This varies from initial pseudocode since Segmentator doesn't quite match it
         """
 
@@ -37,44 +35,25 @@ class Encoder(object):
         '''
         for token in tokens:
             if len(token) < self.l: #If token is small enough
-                self.parsed.append(token)
                 self.legend.add_segment(token)
             else:
                 while len(token) >= self.l:
-                    self.parsed.append(token[:self.l]) #append multiple of l
-                    self.legend.add_segment(token[:self.l])
+                    self.legend.add_segment(token[:self.l]) #append multiple of l
                     token = token[self.l:]
                     if len(token) < self.l:
                         if len(token) != 0: #ignore empty slices
-                            self.parsed.append(token)
                             self.legend.add_segment(token)
-        
+        '''
+        Produce output here
+        For each tuple in legend
+            Write tuple to output
+        endfor
+        '''
+
         print self.legend.legend
         print self.legend.numbered
         print self.legend.output
         print self.legend.reorderable_legend
-        return self.parsed
-    
-    def encode(self):
-        
-        dictionary = []
-        
-        for e in self.parsed:
-            try: #See if it's already in our dictionary. Exception if it's not
-                index = dictionary.index(e)
-            except ValueError: #If not in dictionary, add it
-                dictionary.append(e)
-                
-            self.numbered.append(dictionary.index(e) + 1)
-        
-        return self.numbered
-
-"""
-    string output(list input)
-        Use the input list to produce output similar to the output table in example
-        This will require reordering that is no longer used in adding to the legend
-"""
-
 
 class PriorityDict(object):
     """
@@ -96,20 +75,20 @@ class PriorityDict(object):
         Then add the index of whatever was just found (or not found) to the self.numbered
         """
 
-        index = self.lookup(self.legend, segment)
+        index = self._lookup(self.legend, segment)
 
         if(index == len(self.legend)): #if it's not in there, add it
             self.legend.append((index+1, segment))
             self.reorderable_legend.append((index+1, segment))
 
-        self.output.append(self.lookup(self.reorderable_legend, segment))
-        self.reorderable_legend.insert(0, self.reorderable_legend.pop(self.lookup(self.reorderable_legend, segment))) #move tuple to front of dict
+        self.output.append(self._lookup(self.reorderable_legend, segment))
+        self._prioritize(segment) #move tuple to front of dict
         print ("{}:{}".format(segment, self.reorderable_legend))
         self.numbered.append(index+1)
         
         return index
 
-    def lookup(self, tuple_list, target):
+    def _lookup(self, tuple_list, target):
         """
         lookup index of the target in a tuple in the list, return it's index,
         then move it to the front of the list
@@ -126,3 +105,9 @@ class PriorityDict(object):
             index += 1
 
         return index
+
+    def _prioritize(self, segment):
+        """
+        move the selected segment to the front of the list
+        """
+        self.reorderable_legend.insert(0, self.reorderable_legend.pop(self._lookup(self.reorderable_legend, segment)))
