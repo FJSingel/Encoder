@@ -7,15 +7,15 @@ FJS52@case.edu
 This Module segments and stores a string in a custom ordered dictionary
 """
 from math import ceil
-import re
+import string
 
 class Encoder(object):
     
     def __init__(self, length, input):
         
         try:
-            self.l = int(ceil(length)) #Length arg cast into an int
-            if (self.l < 1):
+            self.length = int(ceil(length)) #Length arg cast into an int
+            if (self.length < 1):
                 raise ValueError
         except ValueError:
             print "Error: Invalid segment length specified. Exiting"
@@ -25,43 +25,40 @@ class Encoder(object):
             raise TypeError
 
         self.legend = PriorityDict() #stores all processed data
+        self.input_file = input
+        self.delimiters = string.whitespace + string.punctuation
+        self.segment = ""
 
+        '''
         try:
             f = open(input)
             self.raw = f.read() #Raw, unparsed data read from file
         except IOError, e:
             print "Error: File not found. Exiting\n", e
             raise e
+        '''
         
-    def segment(self):
+    def segment_file(self):
         """
         Decided to handle reading the file in the constructor
         Each Encoder handles one input file and tokenizes the input by non-alphanumeric characters
         """
-        '''
-        Read tokens
-            If token is small enough
-                add token to legend
-            else 
-                slice token into smaller tokens and add them to legend
-        '''
+        with open(self.input_file) as f:
+            for line in f:
+                for char in line:
+                    self.process_char(char)
 
-        #splits raw input by non-unicode words using regex
-        tokens = re.split('(\W)', self.raw)
-        
-        #count and remove blank values left over by regex
-        tokens = filter(lambda a: a != "", tokens)
-
-        for token in tokens:
-            if len(token) < self.l: #If token is small enough
-                self.legend.add_segment(token)
+    def process_char(self, character):
+        if character != "":
+            if char in self.delimiters:
+                self.legend.add_segment(self.segment)
+                self.legend.add_segment(character)
+                self.segment = ""
             else:
-                while len(token) >= self.l:
-                    self.legend.add_segment(token[:self.l]) #append multiple of l
-                    token = token[self.l:]
-                    if len(token) < self.l:
-                        if len(token) != 0: #ignore empty slices
-                            self.legend.add_segment(token)
+                segment += char
+                if len(self.segment) >= self.length:
+                    self.legend.add_segment(self.segment)
+                    self.segment = ""
 
     def write_results(self, output_file):
         """
@@ -148,3 +145,21 @@ class PriorityDict(object):
         move the selected segment to the front of the list
         """
         self.reorderable_legend.insert(0, self.reorderable_legend.pop(self._lookup(self.reorderable_legend, segment)))
+
+
+'''
+TODO List:
+
+Don't name things 'input'
+Create a makefile
+read 1 character at a time instead of using my old (shoddy) segmentator (which has a McCabe complexity of 5 instead of <5)
+Look into stringIO
+Use String.Punctuation as delimiters
+check empty input
+Write to stdio instead of to a file (makes testing easier) and maybe use a wrapper to print
+in lookup(), be more typesafe
+namedtuple in collections might be useful
+Get clarification of requirements for ANY QUESTIONS
+    Like Writing from pseudocode vs reusing segmentator if they don't agree
+    What form output should be in, like file output vs STDIO
+'''
