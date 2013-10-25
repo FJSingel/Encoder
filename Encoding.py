@@ -49,18 +49,17 @@ class Encoder(object):
                     self.process_char(char)
 
     def process_char(self, character):
-        if character != "":
-            if char in self.delimiters:
+        if character in self.delimiters:
+            self.legend.add_segment(self.segment)
+            self.legend.add_segment(character)
+            self.segment = ""
+        else:
+            self.segment += character
+            if len(self.segment) >= self.length:
                 self.legend.add_segment(self.segment)
-                self.legend.add_segment(character)
                 self.segment = ""
-            else:
-                segment += char
-                if len(self.segment) >= self.length:
-                    self.legend.add_segment(self.segment)
-                    self.segment = ""
 
-    def write_results(self, output_file):
+    def write_everything(self, output_file):
         """
         Given PriorityDict, it writes the legend and encoded string to an output file
 
@@ -109,6 +108,9 @@ class PriorityDict(object):
         Then add the index of whatever was just found (or not found) to the self.numbered
         Move whatever was accessed to the front of reorderable_legend
         """
+
+        if segment == "":
+            return -1
 
         index = self._lookup(self.legend, segment)
 
