@@ -72,6 +72,20 @@ class Encoder(object):
         else:
             target.close()
 
+    def write_reordered(self, output_file):
+        """
+        Writes only the legend to output_file
+        """
+        try:
+            target = open(output_file, 'w')
+            for value in self.legend.output:
+                target.write(str(value) + " ")
+        except IOError, e:
+            print "IOError while writing output."
+            raise e
+        else:
+            target.close()
+
     def write_legend(self, output_file):
         """
         Writes only the legend to output_file
