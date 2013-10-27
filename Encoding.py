@@ -11,7 +11,7 @@ import string
 
 class Encoder(object):
     
-    def __init__(self, length, input):
+    def __init__(self, length, reading_file):
         
         try:
             self.length = int(ceil(length)) #Length arg cast into an int
@@ -25,18 +25,9 @@ class Encoder(object):
             raise TypeError
 
         self.legend = PriorityDict() #stores all processed data
-        self.input_file = input
+        self.input_file = reading_file
         self.delimiters = string.whitespace + string.punctuation
         self.segment = ""
-
-        '''
-        try:
-            f = open(input)
-            self.raw = f.read() #Raw, unparsed data read from file
-        except IOError, e:
-            print "Error: File not found. Exiting\n", e
-            raise e
-        '''
         
     def segment_file(self):
         """
@@ -46,9 +37,12 @@ class Encoder(object):
         with open(self.input_file) as f:
             for line in f:
                 for char in line:
-                    self.process_char(char)
+                    self._process_char(char)
 
-    def process_char(self, character):
+        #Handles case where there's an unprinted segment leftover.
+        self.legend.add_segment(self.segment)
+
+    def _process_char(self, character):
         """
         If character is a delimiter, add the segment and character to the legend
         If it's not, then append the char to the segment and add the segment
@@ -70,7 +64,6 @@ class Encoder(object):
         """
         try:
             target = open(output_file, 'w')
-            target.write("Input:  ")
             for value in self.legend.numbered:
                 target.write(str(value) + " ")
         except IOError, e:
@@ -146,31 +139,27 @@ class PriorityDict(object):
         if segment == "":
             return -1
 
-        index = self._lookup(self.legend, segment)
+        index = self._lookup_segment(self.legend, segment)
 
         if(index == len(self.reorderable_legend)): #if it's not in there, add it
             self.legend.append((index+1, segment))
             self.reorderable_legend.append((index+1, segment))
 
-        self.output.append(self._lookup(self.reorderable_legend, segment))
+        self.output.append(self._lookup_segment(self.reorderable_legend, segment))
         self._prioritize(segment) #move tuple to front of list
         self.numbered.append(index+1)
         
         return index
 
-    def _lookup(self, tuple_list, target):
+    def _lookup_segment(self, tuple_list, target):
         """
-        lookup index of the target in a tuple in the list, return it's index,
-        then move it to the front of the list
-
-        Returns the index it was found at. Returns len(legend) if not found
+        Returns the index target is found at. Returns len(legend) if not found
+        Legend contains tuples of (int value, string segment)
         """
         index = 0
 
         for key, segment in tuple_list:
-            if target == tuple_list[index][0]:
-                return index
-            if target == tuple_list[index][1]:
+            if target == segment:
                 return index
             index += 1
 
@@ -180,21 +169,16 @@ class PriorityDict(object):
         """
         move the selected segment to the front of the list
         """
-        self.reorderable_legend.insert(0, self.reorderable_legend.pop(self._lookup(self.reorderable_legend, segment)))
+        self.reorderable_legend.insert(0, self.reorderable_legend.pop(self._lookup_segment(self.reorderable_legend, segment)))
 
 
 '''
 TODO List:
 
-Don't name things 'input'
 Create a makefile
-read 1 character at a time instead of using my old (shoddy) segmentator (which has a McCabe complexity of 5 instead of <5)
 Look into stringIO
-Use String.Punctuation as delimiters
 check empty input
 Write to stdio instead of to a file (makes testing easier) and maybe use a wrapper to print
-in lookup(), be more typesafe
-namedtuple in collections might be useful
 Get clarification of requirements for ANY QUESTIONS
     Like Writing from pseudocode vs reusing segmentator if they don't agree
     What form output should be in, like file output vs STDIO
