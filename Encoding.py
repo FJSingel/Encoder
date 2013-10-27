@@ -49,6 +49,11 @@ class Encoder(object):
                     self.process_char(char)
 
     def process_char(self, character):
+        """
+        If character is a delimiter, add the segment and character to the legend
+        If it's not, then append the char to the segment and add the segment
+         to legend if it's long enough
+        """
         if character in self.delimiters:
             self.legend.add_segment(self.segment)
             self.legend.add_segment(character)
@@ -58,6 +63,35 @@ class Encoder(object):
             if len(self.segment) >= self.length:
                 self.legend.add_segment(self.segment)
                 self.segment = ""
+
+    def write_encoded(self, output_file):
+        """
+        Writes only the encoded string to output_file
+        """
+        try:
+            target = open(output_file, 'w')
+            target.write("Input:  ")
+            for value in self.legend.numbered:
+                target.write(str(value) + " ")
+        except IOError, e:
+            print "IOError while writing output."
+            raise e
+        else:
+            target.close()
+
+    def write_legend(self, output_file):
+        """
+        Writes only the legend to output_file
+        """
+        try:
+            target.write("\n\nLegend\n")
+            for pair in self.legend.legend:
+                target.write(str(pair) + "\n")
+        except IOError, e:
+            print "IOError while writing output."
+            raise e
+        else:
+            target.close()
 
     def write_everything(self, output_file):
         """
