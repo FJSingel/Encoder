@@ -1,9 +1,7 @@
 """
 Created on Oct 12, 2013
-
 @author: Frank Singel
 FJS52@case.edu
-
 This Module segments and stores a string in a custom ordered dictionary
 """
 from math import ceil
@@ -28,9 +26,6 @@ class Encoder(object):
         self.input_file = reading_file
         self.delimiters = string.whitespace + string.punctuation
         self.segment = ""
-        self.encoded_string = ""
-        self.reordered_string = ""
-        self.legend_string = ""
         
     def segment_file(self):
         """
@@ -81,12 +76,10 @@ class PriorityDict(object):
         Then add the index of whatever was just found (or not found) to the self.numbered
         Move whatever was accessed to the front of reorderable_legend
         """
-
+        #ignore blank additions
         if segment == "":
             return -1
-
         index = self._lookup_segment(self.legend, segment)
-
         if(index == len(self.reorderable_legend)): #if it's not in there, add it
             self.legend.append((index+1, segment))
             self.reorderable_legend.append((index+1, segment))
@@ -94,7 +87,6 @@ class PriorityDict(object):
         self.output.append(self._lookup_segment(self.reorderable_legend, segment))
         self._prioritize(segment) #move tuple to front of list
         self.numbered.append(index+1)
-        
         return index
 
     def _lookup_segment(self, tuple_list, target):
@@ -103,7 +95,6 @@ class PriorityDict(object):
         Legend contains tuples of (int value, string segment)
         """
         index = 0
-
         for key, segment in tuple_list:
             if target == segment:
                 return index
@@ -113,8 +104,12 @@ class PriorityDict(object):
     def _prioritize(self, segment):
         """
         move the selected segment to the front of the list
+        pops the element off and inserts it to the front of the list
         """
-        self.reorderable_legend.insert(0, self.reorderable_legend.pop(self._lookup_segment(self.reorderable_legend, segment)))
+        self.reorderable_legend.insert(
+            0, self.reorderable_legend.pop(
+                self._lookup_segment(
+                    self.reorderable_legend, segment)))
 
     def __str__(self):
         legend_string = ("Encoded:\t\t" + str(self.numbered) +
@@ -135,10 +130,6 @@ Create a makefile
 Look into stringIO
 check empty input
 Write to stdio instead of to a file (makes testing easier) and maybe use a wrapper to print
-Get clarification of requirements for ANY QUESTIONS
-    Like Writing from pseudocode vs reusing segmentator if they don't agree
-    What form output should be in, like file output vs STDIO
-whitespace problems
-Finally where I have else
-Just put segment to a string
+--> Get clarification of requirements for ANY QUESTIONS
+potential whitespace problems
 '''
