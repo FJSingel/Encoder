@@ -28,6 +28,9 @@ class Encoder(object):
         self.input_file = reading_file
         self.delimiters = string.whitespace + string.punctuation
         self.segment = ""
+        self.encoded_string = ""
+        self.reordered_string = ""
+        self.legend_string = ""
         
     def segment_file(self):
         """
@@ -38,9 +41,9 @@ class Encoder(object):
             for line in f:
                 for char in line:
                     self._process_char(char)
-
         #Handles case where there's an unprinted segment leftover.
         self.legend.add_segment(self.segment)
+        return str(self.legend.numbered)
 
     def _process_char(self, character):
         """
@@ -57,78 +60,7 @@ class Encoder(object):
             if len(self.segment) >= self.length:
                 self.legend.add_segment(self.segment)
                 self.segment = ""
-
-    def write_encoded(self, output_file):
-        """
-        Writes only the encoded string to output_file
-        """
-        try:
-            target = open(output_file, 'w')
-            for value in self.legend.numbered:
-                target.write(str(value) + " ")
-        except IOError, e:
-            print "IOError while writing output."
-            raise e
-        else:
-            target.close()
-
-    def write_reordered(self, output_file):
-        """
-        Writes only the legend to output_file
-        """
-        try:
-            target = open(output_file, 'w')
-            for value in self.legend.output:
-                target.write(str(value) + " ")
-        except IOError, e:
-            print "IOError while writing output."
-            raise e
-        else:
-            target.close()
-
-    def write_legend(self, output_file):
-        """
-        Writes only the legend to output_file
-        """
-        try:
-            target.write("\n\nLegend\n")
-            for pair in self.legend.legend:
-                target.write(str(pair) + "\n")
-        except IOError, e:
-            print "IOError while writing output."
-            raise e
-        else:
-            target.close()
-
-    def write_everything(self, output_file):
-        """
-        Given PriorityDict, it writes the legend and encoded string to an output file
-
-        Write Output
-        Write Legend
-        For each tuple in legend
-            Write tuple to output
-        endfor
-        """
-        try:
-            target = open(output_file, 'w')
-            target.write("Input:  ")
-            for value in self.legend.numbered:
-                target.write(str(value) + " ")
-
-            target.write("\nOutput: ")
-            for value in self.legend.output:
-                target.write(str(value) + " ")
-
-            target.write("\n\nLegend\n")
-            for pair in self.legend.legend:
-                target.write(str(pair) + "\n")
-        except IOError, e:
-            print "IOError while writing output."
-            raise e
-        else:
-            target.close()
-
+    
 class PriorityDict(object):
     """
     This class maintains a list of tuples mapping (int: segment)
@@ -136,10 +68,10 @@ class PriorityDict(object):
     """
 
     def __init__(self):
-        self.legend = [] #Don't reorder this one. It's our original legend
-        self.numbered = [] #This holds the number conversion of the string
-        self.reorderable_legend = [] #This will be the reordering list used to construct the output
-        self.output = []    #This will represent the output string of ints
+        self.legend = SpacedList() #Don't reorder this one. It's our original legend
+        self.numbered = SpacedList() #This holds the number conversion of the string
+        self.reorderable_legend = SpacedList() #This will be the reordering list used to construct the output
+        self.output = SpacedList() #This will represent the output string of ints
     
     def add_segment(self, segment):
         """
@@ -176,7 +108,6 @@ class PriorityDict(object):
             if target == segment:
                 return index
             index += 1
-
         return index
 
     def _prioritize(self, segment):
@@ -185,7 +116,18 @@ class PriorityDict(object):
         """
         self.reorderable_legend.insert(0, self.reorderable_legend.pop(self._lookup_segment(self.reorderable_legend, segment)))
 
+    def __str__(self):
+        legend_string = ("Encoded:\t\t" + str(self.numbered) +
+                         "\nReordered encoded:\t" + str(self.output) +
+                         "\nLegend: " + str(self.legend))
+        return legend_string
 
+class SpacedList(list):
+    def __str__(self):
+        output = ""
+        for value in self:
+            output += (str(value) + " ")
+        return output
 '''
 TODO List:
 
@@ -196,4 +138,7 @@ Write to stdio instead of to a file (makes testing easier) and maybe use a wrapp
 Get clarification of requirements for ANY QUESTIONS
     Like Writing from pseudocode vs reusing segmentator if they don't agree
     What form output should be in, like file output vs STDIO
+whitespace problems
+Finally where I have else
+Just put segment to a string
 '''
