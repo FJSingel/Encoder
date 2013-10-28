@@ -63,12 +63,12 @@ class BasisTests(TestCase):
         assert_equals("", segment.segment)
 
     def test_init_value_error(self):
-        #if 16 and except 18
+        #if 16 and except 18 and baddata
         with assert_raises(ValueError):
             segment = Encoding.Encoder(-3, "Input.txt")
 
     def test_init_type_error(self):
-        #except 21
+        #except 21 and baddata
         with assert_raises(TypeError):
             segment = Encoding.Encoder('a', "Input.txt")
 
@@ -330,18 +330,41 @@ class GoodDataTests(TestCase):
     """
     @class_setup
     def setUp(self):
-        pass
+        self.onechar = open("onechar.txt", "w+")
+        self.onechar.write("A")
+        self.onechar.close()
+        self.newlines = open("newlines.txt", "w+")
+        self.newlines.write("\n\n\n\n\n\n\n")
+        self.newlines.close()
 
     def test_regular_use(self):
-        pass
+        segment = Encoding.Encoder(3, "Input.txt")
+        assert_equals("1 2 3 4 5 2 1 2 6 5 2 1 2 7 8 9 ", segment.segment_file())
+
+    def test_min_token_size(self):
+        #gooddata
+        segment = Encoding.Encoder(1, "Input.txt")
+        assert_equals("1 2 3 4 5 6 7 2 1 2 8 4 9 7 2 1 2 10 6 11 12 13 ", segment.segment_file())
+
+    def test_newlines_file(self):
+        segment = Encoding.Encoder(3, "newlines.txt")
+        assert_equals("1 1 1 1 1 1 1 ", segment.segment_file())
+
+    def test_non_ascii_file(self):
+        segment = Encoding.Encoder(3, "nonascii.txt")
+        assert_equals("1 2 3 4 2 5 6 2 3 4 7 ", segment.segment_file())
         
     def tearDown(self):
-        pass
+        os.remove("onechar.txt")
 
 class BadDataTests(TestCase):
     @class_setup
     def setUp(self):
-        pass
+        self.blank = open("blank.txt", "w+")
+        self.blank_encoder = Encoding.Encoder(3, "blank.txt")
+
+    def test_empty_file(self):
+        assert_equals("", self.blank_encoder.segment_file())
 
     def test_not_in_prioritize(self):
         #baddata
@@ -355,9 +378,18 @@ class BadDataTests(TestCase):
         PDict = Encoding.PriorityDict()
         assert_equals(len(PDict.reorderable_legend), PDict._lookup_segment(PDict.reorderable_legend, "Lt"))
 
+    def test_init_value_error(self):
+        #if 16 and except 18 and baddata
+        with assert_raises(ValueError):
+            segment = Encoding.Encoder(-3, "Input.txt")
+
+    def test_init_type_error(self):
+        #except 21 and baddata
+        with assert_raises(TypeError):
+            segment = Encoding.Encoder('a', "Input.txt")
 
     def tearDown(self):
-        pass
+        os.remove("blank.txt")
 
 
 class StressTest(TestCase):
@@ -370,21 +402,8 @@ class StressTest(TestCase):
 
     @suite('disabled', reason="Time Intensive Stress Test not needed for debug purposes")
     def test_more_input(self):
-    	segment = Encoding.Encoder(3, "Excerpt.txt")
+    	segment = Encoding.Encoder(3, "HEART OF DARKNESS.txt")
         test = segment.segment_file()
-
-    def tearDown(self):
-        pass
-class ErrorGuessing(TestCase):
-    """
-    For tests that aren't required under other cases
-    """
-    @class_setup
-    def setUp(self):
-        pass
-
-    def test_more_input(self):
-        pass
 
     def tearDown(self):
         pass
