@@ -29,8 +29,8 @@ class Encoder(object):
         
     def segment_file(self):
         """
-        Decided to handle reading the file in the constructor
-        Each Encoder handles one input file and tokenizes the input by non-alphanumeric characters
+        Reads each character one at a time
+        Calls _process_char on each.
         """
         with open(self.input_file) as f:
             for line in f:
@@ -103,20 +103,20 @@ class PriorityDict(object):
 
     def _prioritize(self, segment):
         """
-        move the selected segment to the front of the list
+        move the selected segment to the front of reorderable_legend
         pops the element off and inserts it to the front of the list
         """
         self.reorderable_legend.insert(
             0, self.reorderable_legend.pop(
                 self._lookup_segment(
                     self.reorderable_legend, segment)))
-
+    '''
     def __str__(self):
         legend_string = ("Encoded:\t\t" + str(self.numbered) +
                          "\nReordered encoded:\t" + str(self.output) +
                          "\nLegend: " + str(self.legend))
         return legend_string
-
+'''
 class SpacedList(list):
     def __str__(self):
         output = ""
