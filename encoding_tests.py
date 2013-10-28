@@ -4,6 +4,7 @@ Created on Sep 8, 2013
 @author: Frank
 '''
 import os
+import string
 
 import mock
 from testify import *
@@ -57,6 +58,9 @@ class BasisTests(TestCase):
     def test_init(self):
         #init 12
         segment = Encoding.Encoder(3, "Input.txt")
+        assert_equals("Input.txt", segment.input_file)
+        assert_equals(string.whitespace + string.punctuation, segment.delimiters)
+        assert_equals("", segment.segment)
 
     def test_init_value_error(self):
         #if 16 and except 18
@@ -126,50 +130,84 @@ class BasisTests(TestCase):
 
     def test_add_segment(self):
         #add_segment 71 if 80 if 83
-        pass
+        PDict = Encoding.PriorityDict()
+        assert_equals(0, PDict.add_segment("Hey"))
+        assert_equals("0 ", str(PDict.output))
+        assert_equals("1 ", str(PDict.numbered))
+        assert_equals("(1, \'Hey\') ", str(PDict.legend))
 
     def test_ordered_dict_init(self):
         #init 65
-        pass
+        PDict = Encoding.PriorityDict()
+        assert_equals("", str(PDict.output))
+        assert_equals("", str(PDict.numbered))
+        assert_equals("", str(PDict.legend))
+        assert_equals("", str(PDict.reorderable_legend))
 
     def test_add_segment_blank(self):
         #if 80
-        pass
+        PDict = Encoding.PriorityDict()
+        assert_equals(-1, PDict.add_segment(""))
+        assert_equals("", str(PDict.output))
+        assert_equals("", str(PDict.numbered))
+        assert_equals("", str(PDict.legend))
 
     def test_add_segment_not_found(self):
         #if 83
-        pass
+        PDict = Encoding.PriorityDict()
+        assert_equals(0, PDict.add_segment("Hey"))
+        assert_equals("0 ", str(PDict.output))
+        assert_equals("1 ", str(PDict.numbered))
+        assert_equals("(1, \'Hey\') ", str(PDict.legend))
 
     def test_add_segment_is_found(self):
         #if 83
-        pass
+        PDict = Encoding.PriorityDict()
+        assert_equals(0, PDict.add_segment("Hey"))
+        assert_equals("0 ", str(PDict.output))
+        assert_equals("1 ", str(PDict.numbered))
+        assert_equals("(1, \'Hey\') ", str(PDict.legend))
+        assert_equals(0, PDict.add_segment("Hey"))
+        assert_equals("0 0 ", str(PDict.output))
+        assert_equals("1 1 ", str(PDict.numbered))
+        assert_equals("(1, \'Hey\') ", str(PDict.legend))
+
 
     def test_lookup_default(self):
-        #_lookup_segment 92
-        pass
+        #_lookup_segment 92 and if 99
+        PDict = Encoding.PriorityDict()
+        PDict.reorderable_legend = [(1, "Hi"), (2, "Lt"), (3, "Dan")]
+        assert_equals(1, PDict._lookup_segment(PDict.reorderable_legend, "Lt"))
+
+    def test_lookup_no_match(self):
+        #for 99
+        PDict = Encoding.PriorityDict()
+        PDict.reorderable_legend = [(1, "Hi"), (2, "Lt"), (3, "Dan")]
+        assert_equals(len(PDict.reorderable_legend), PDict._lookup_segment(PDict.reorderable_legend, "IceCream"))
 
     def test_lookup_empty(self):
-        #for 98
-        pass
-
-    def test_lookup_match(self):
-        #if 99
-        pass
+        #if 98
+        PDict = Encoding.PriorityDict()
+        assert_equals(len(PDict.reorderable_legend), PDict._lookup_segment(PDict.reorderable_legend, "Lt"))
 
     def test_prioritize(self):
         #_prioritize 104
-        pass
+        PDict = Encoding.PriorityDict()
+        PDict.reorderable_legend = [(1, "Hey"), (2, "Lt"), (3, "Dan")]
+        PDict._prioritize("Dan")
+        assert_equals((3, "Dan"), PDict.reorderable_legend[0])
 
     def test_spaced_list_str(self):
         #__str__ 121
-        pass
+        SList = Encoding.SpacedList([1,2,3,4])
+        assert_equals("1 2 3 4 ", str(SList))
         
     def tearDown(self):
         os.remove("blank.txt")
 
 class DataFlowTests(TestCase):
     """
-    Calling stuff out of order
+    Stuff defined in one place and used in another
     """
     @class_setup
     def setUp(self):
@@ -200,7 +238,7 @@ class BoundaryTests(TestCase):
     def tearDown(self):
         pass
 
-class GoodDataTests():
+class GoodDataTests(TestCase):
     """
     Min/max norm configuration
     Compatability with old Data
@@ -216,14 +254,17 @@ class GoodDataTests():
     def tearDown(self):
         pass
 
-class BadDataTests():
+class BadDataTests(TestCase):
     @class_setup
     def setUp(self):
         pass
 
-    def test_regular_use(self):
-        pass
-        
+    def test_not_in_prioritize(self):
+        with assert_raises(IndexError):
+            PDict = Encoding.PriorityDict()
+            PDict.reorderable_legend = [(1, "Hey"), (2, "Lt"), (3, "Dan")]
+            PDict._prioritize("Don")
+
     def tearDown(self):
         pass
 
@@ -243,7 +284,19 @@ class StressTest(TestCase):
 
     def tearDown(self):
         pass
+class ErrorGuessing(TestCase):
+    """
+    For tests that aren't required under other cases
+    """
+    @class_setup
+    def setUp(self):
+        pass
 
+    def test_more_input(self):
+        pass
+
+    def tearDown(self):
+        pass
   
 if __name__ == "__main__":
     run()
