@@ -8,7 +8,7 @@ test: encoding_tests.py
 	python encoding_tests.py -v -x stress
 
 stresstest: encoding_tests.py
-	python encoding_tests.py -v -1 stress
+	python encoding_tests.py -v -i stress
 
 clean:
 	rm *.pyc
