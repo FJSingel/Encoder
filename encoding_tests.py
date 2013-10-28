@@ -80,7 +80,7 @@ class BasisTests(TestCase):
         #segment_file 30
         segment = encoding.Encoder(3, "Input.txt")
         assert_equals("1 2 3 4 5 2 1 2 6 5 2 1 2 7 8 9 ", segment.segment_file())
-        
+
     def test_segment_line_loop(self):
         #for 36 and for 37
         assert_equals("", self.blank_encoder.segment_file())
@@ -176,7 +176,6 @@ class BasisTests(TestCase):
         assert_equals("0 0 ", str(PDict.output))
         assert_equals("1 1 ", str(PDict.numbered))
         assert_equals("(1, \'Hey\') ", str(PDict.legend))
-
 
     def test_lookup_default(self):
         #_lookup_segment 92 and if 99
@@ -332,6 +331,9 @@ class GoodDataTests(TestCase):
     """
     @class_setup
     def setUp(self):
+        self.blank = open("blank.txt", "w+")
+        self.blank_encoder = encoding.Encoder(3, "blank.txt")
+        self.blank.close()
         self.onechar = open("onechar.txt", "w+")
         self.onechar.write("A")
         self.onechar.close()
@@ -355,21 +357,22 @@ class GoodDataTests(TestCase):
         segment = encoding.Encoder(3, "newlines.txt")
         assert_equals("1 1 1 1 1 1 1 ", segment.segment_file())
 
-    def test_non_ascii_file(self):
-        segment = encoding.Encoder(3, "nonascii.txt")
-        assert_equals("1 2 3 4 2 5 6 2 3 4 7 ", segment.segment_file())
+    def test_empty_file(self):
+        assert_equals("", self.blank_encoder.segment_file())
         
     def tearDown(self):
         os.remove("onechar.txt")
         os.remove("newlines.txt")
         os.remove("Input.txt")
+        os.remove("blank.txt")
 
 class BadDataTests(TestCase):
+    """
+    Every test in this class falls under the bad data category of tests
+    in addition to what their individual comments state
+    """
     @class_setup
     def setUp(self):
-        self.blank = open("blank.txt", "w+")
-        self.blank_encoder = encoding.Encoder(3, "blank.txt")
-        self.blank.close()
         self.example = open("Input.txt", "w+")
         self.example.write("I came, I saw, I left.")
         self.example.close()
@@ -378,28 +381,24 @@ class BadDataTests(TestCase):
         except OSError, e:
             pass
 
-    def test_empty_file(self):
-        assert_equals("", self.blank_encoder.segment_file())
-
     def test_not_in_prioritize(self):
-        #baddata
         with assert_raises(IndexError):
             PDict = encoding.PriorityDict()
             PDict.reorderable_legend = [(1, "Hey"), (2, "Lt"), (3, "Dan")]
             PDict._prioritize("Don")
 
     def test_lookup_empty(self):
-        #if 98 and baddata
+        #if 98
         PDict = encoding.PriorityDict()
         assert_equals(len(PDict.reorderable_legend), PDict._lookup_segment(PDict.reorderable_legend, "Lt"))
 
     def test_init_value_error(self):
-        #if 16 and except 18 and baddata
+        #if 16 and except 18
         with assert_raises(ValueError):
             segment = encoding.Encoder(-3, "Input.txt")
 
     def test_init_type_error(self):
-        #except 21 and baddata
+        #except 21
         with assert_raises(TypeError):
             segment = encoding.Encoder('a', "Input.txt")
 
@@ -409,24 +408,38 @@ class BadDataTests(TestCase):
             segment.segment_file()
 
     def tearDown(self):
-        os.remove("blank.txt")
         os.remove("Input.txt")
 
 class StressTest(TestCase):
     """
-    #Tries to compress a large excerpt from 'Heart of Darkness'
+    Tries to compress a the entirety of 'Heart of Darkness'
     """
-    @class_setup
-    def setUp(self):
-        pass
-
-    @suite('disabled', reason="Time Intensive Stress Test not needed for debug purposes")
+    @suite('stress', reason="Time Intensive Stress Test not needed on every test run")
     def test_more_input(self):
     	segment = encoding.Encoder(3, "HEART OF DARKNESS.txt")
         test = segment.segment_file()
-
-    def tearDown(self):
-        pass
   
+class ErrorGuessing(TestCase):
+    """
+    Other things I thought I'd test
+    """
+
+    def test_non_ascii_file(self):
+        #it just isn't equipped to handle this correctly, but possibly should
+        segment = encoding.Encoder(3, "nonascii.txt")
+        assert_equals("1 2 3 2 4 2 3 5 ", segment.segment_file())
+
+    @suite('disabled', reason="Can't really Mock private methods")
+    def test_mock_lookup_in_add_first_segment(self):
+        #attempt to use mock constructively
+        with mock.patch.object(encoding, "_lookup_segment", self.mocked_lookup_empty_list):
+            PDict = encoding.PriorityDict()
+            assert_equals(0, PDict.add_segment("Hey"))
+            assert_equals(0, PDict.test_add_segment("Ho"))
+
+    def mocked_lookup_empty_list(self, tuple_list, target):
+        #makes lookup say it finds the list empty
+        return 0
+
 if __name__ == "__main__":
     run()
