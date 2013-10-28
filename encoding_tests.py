@@ -82,24 +82,26 @@ class BasisTests(TestCase):
         assert_equals("", self.blank_encoder.segment_file())
 
     def test_process_char(self):
-        #process_char 43 and if 55
+        #process_char 43, if 55, dataflow
         segment = Encoding.Encoder(3, "blank.txt")
         segment._process_char('A')
         assert_equals("", str(segment.legend.numbered))
         assert_equals("", str(segment.legend.output))
         assert_equals("", str(segment.legend.legend))
+        assert_equals("A", segment.segment)
         segment._process_char('P')
         assert_equals("", str(segment.legend.numbered))
         assert_equals("", str(segment.legend.output))
         assert_equals("", str(segment.legend.legend))
+        assert_equals("AP", segment.segment)
         segment._process_char('I')
         assert_equals("1 ", str(segment.legend.numbered))
         assert_equals("0 ", str(segment.legend.output))
         assert_equals("(1, \'API\') ", str(segment.legend.legend))
+        assert_equals("", segment.segment)
 
     def test_process_char_nondelimiter(self):
-        #if 49 
-        #probably dataflow too
+        #if 49 and dataflow
         segment = Encoding.Encoder(3, "blank.txt")
         segment._process_char('A')
         assert_equals("A", segment.segment)
@@ -108,8 +110,7 @@ class BasisTests(TestCase):
         assert_equals("", str(segment.legend.legend))
 
     def test_process_char_delimiter(self):
-        #if 49 
-        #probably dataflow too
+        #if 49 and dataflow
         segment = Encoding.Encoder(3, "blank.txt")
         segment._process_char('.')
         assert_equals("", segment.segment)
@@ -153,7 +154,7 @@ class BasisTests(TestCase):
         assert_equals("", str(PDict.legend))
 
     def test_add_segment_not_found(self):
-        #if 83
+        #if 83 and index's dataflow
         PDict = Encoding.PriorityDict()
         assert_equals(0, PDict.add_segment("Hey"))
         assert_equals("0 ", str(PDict.output))
@@ -161,7 +162,7 @@ class BasisTests(TestCase):
         assert_equals("(1, \'Hey\') ", str(PDict.legend))
 
     def test_add_segment_is_found(self):
-        #if 83
+        #if 83 and index's dataflow
         PDict = Encoding.PriorityDict()
         assert_equals(0, PDict.add_segment("Hey"))
         assert_equals("0 ", str(PDict.output))
@@ -180,13 +181,13 @@ class BasisTests(TestCase):
         assert_equals(1, PDict._lookup_segment(PDict.reorderable_legend, "Lt"))
 
     def test_lookup_no_match(self):
-        #for 99
+        #for 99 and gooddata
         PDict = Encoding.PriorityDict()
         PDict.reorderable_legend = [(1, "Hi"), (2, "Lt"), (3, "Dan")]
         assert_equals(len(PDict.reorderable_legend), PDict._lookup_segment(PDict.reorderable_legend, "IceCream"))
 
     def test_lookup_empty(self):
-        #if 98
+        #if 98 and baddata
         PDict = Encoding.PriorityDict()
         assert_equals(len(PDict.reorderable_legend), PDict._lookup_segment(PDict.reorderable_legend, "Lt"))
 
@@ -211,32 +212,115 @@ class DataFlowTests(TestCase):
     """
     @class_setup
     def setUp(self):
-        pass
+        self.blank = open("blank.txt", "w+")
 
-    def test_regular_use(self):
-        pass
-        
+    def test_process_char(self):
+        #process_char 43, if 55, dataflow
+        segment = Encoding.Encoder(3, "blank.txt")
+        segment._process_char('A')
+        assert_equals("", str(segment.legend.numbered))
+        assert_equals("", str(segment.legend.output))
+        assert_equals("", str(segment.legend.legend))
+        assert_equals("A", segment.segment)
+        segment._process_char('P')
+        assert_equals("", str(segment.legend.numbered))
+        assert_equals("", str(segment.legend.output))
+        assert_equals("", str(segment.legend.legend))
+        assert_equals("AP", segment.segment)
+        segment._process_char('I')
+        assert_equals("1 ", str(segment.legend.numbered))
+        assert_equals("0 ", str(segment.legend.output))
+        assert_equals("(1, \'API\') ", str(segment.legend.legend))
+        assert_equals("", segment.segment)
+
+    def test_process_char_nondelimiter(self):
+        #if 49 and dataflow
+        segment = Encoding.Encoder(3, "blank.txt")
+        segment._process_char('A')
+        assert_equals("A", segment.segment)
+        assert_equals("", str(segment.legend.numbered))
+        assert_equals("", str(segment.legend.output))
+        assert_equals("", str(segment.legend.legend))
+
+    def test_process_char_delimiter(self):
+        #if 49 and dataflow
+        segment = Encoding.Encoder(3, "blank.txt")
+        segment._process_char('.')
+        assert_equals("", segment.segment)
+        assert_equals("1 ", str(segment.legend.numbered))
+        assert_equals("0 ", str(segment.legend.output))
+        assert_equals("(1, \'.\') ", str(segment.legend.legend))
+    
+    def test_add_segment_not_found(self):
+        #if 83 and index's dataflow
+        PDict = Encoding.PriorityDict()
+        assert_equals(0, PDict.add_segment("Hey"))
+        assert_equals("0 ", str(PDict.output))
+        assert_equals("1 ", str(PDict.numbered))
+        assert_equals("(1, \'Hey\') ", str(PDict.legend))
+
+    def test_add_segment_is_found(self):
+        #if 83 and index's dataflow
+        PDict = Encoding.PriorityDict()
+        assert_equals(0, PDict.add_segment("Hey"))
+        assert_equals("0 ", str(PDict.output))
+        assert_equals("1 ", str(PDict.numbered))
+        assert_equals("(1, \'Hey\') ", str(PDict.legend))
+        assert_equals(0, PDict.add_segment("Hey"))
+        assert_equals("0 0 ", str(PDict.output))
+        assert_equals("1 1 ", str(PDict.numbered))
+        assert_equals("(1, \'Hey\') ", str(PDict.legend))
+
     def tearDown(self):
-        pass
+        os.remove("blank.txt")
 
 class BoundaryTests(TestCase):
     """
     Check for off-by-one errors: Just above, on and below max
     
-    if 16
     if 55
     if 83?
     if 99?
     """
     @class_setup
     def setUp(self):
-        pass
+        self.blank = open("blank.txt", "w+")
 
-    def test_regular_use(self):
-        pass
-        
+    def test_process_char_short_segment(self):
+        #If char processed when just too short for storing
+        #Boundary Analysis
+        segment = Encoding.Encoder(3, "blank.txt")
+        segment.segment = "A"
+        segment._process_char('A')
+        assert_equals("AA", segment.segment)
+        assert_equals("", str(segment.legend.numbered))
+        assert_equals("", str(segment.legend.output))
+        assert_equals("", str(segment.legend.legend))
+    
+    def test_process_char_short_segment(self):
+        #If char processed to exactly store
+        #Boundary Analysis
+        segment = Encoding.Encoder(3, "blank.txt")
+        segment.segment = "AA"
+        segment._process_char('A')
+        assert_equals("", segment.segment)
+        assert_equals("1 ", str(segment.legend.numbered))
+        assert_equals("0 ", str(segment.legend.output))
+        assert_equals("(1, \'AAA\') ", str(segment.legend.legend))
+
+    def test_process_char_short_segment(self):
+        #If char processed to beyond store; shouldn't happen
+        #Boundary Analysis
+        segment = Encoding.Encoder(3, "blank.txt")
+        segment.segment = "AAA"
+        segment._process_char('A')
+        assert_equals("", segment.segment)
+        assert_equals("1 ", str(segment.legend.numbered))
+        assert_equals("0 ", str(segment.legend.output))
+        assert_equals("(1, \'AAAA\') ", str(segment.legend.legend))
+
     def tearDown(self):
-        pass
+        os.remove("blank.txt")
 
 class GoodDataTests(TestCase):
     """
@@ -260,10 +344,17 @@ class BadDataTests(TestCase):
         pass
 
     def test_not_in_prioritize(self):
+        #baddata
         with assert_raises(IndexError):
             PDict = Encoding.PriorityDict()
             PDict.reorderable_legend = [(1, "Hey"), (2, "Lt"), (3, "Dan")]
             PDict._prioritize("Don")
+
+    def test_lookup_empty(self):
+        #if 98 and baddata
+        PDict = Encoding.PriorityDict()
+        assert_equals(len(PDict.reorderable_legend), PDict._lookup_segment(PDict.reorderable_legend, "Lt"))
+
 
     def tearDown(self):
         pass
