@@ -429,17 +429,5 @@ class ErrorGuessing(TestCase):
         segment = encoding.Encoder(3, "nonascii.txt")
         assert_equals("1 2 3 2 4 2 3 5 ", segment.segment_file())
 
-    @suite('disabled', reason="Can't really Mock private methods")
-    def test_mock_lookup_in_add_first_segment(self):
-        #attempt to use mock constructively
-        with mock.patch.object(encoding, "_lookup_segment", self.mocked_lookup_empty_list):
-            PDict = encoding.PriorityDict()
-            assert_equals(0, PDict.add_segment("Hey"))
-            assert_equals(0, PDict.test_add_segment("Ho"))
-
-    def mocked_lookup_empty_list(self, tuple_list, target):
-        #makes lookup say it finds the list empty
-        return 0
-
 if __name__ == "__main__":
     run()

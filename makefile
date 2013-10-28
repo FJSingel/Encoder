@@ -5,10 +5,10 @@ encoder: encoding.py
 	python -m compileall encoding_tests.py
 
 test: encoding_tests.py
-	python encoding_tests.py -v -x disabled
+	python encoding_tests.py -v -x stress
 
 stresstest: encoding_tests.py
-	python encoding_tests.py -v -1 disabled
+	python encoding_tests.py -v -1 stress
 
 clean:
 	rm *.pyc
