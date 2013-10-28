@@ -8,9 +8,12 @@ from math import ceil
 import string
 
 class Encoder(object):
-    
+    """
+    Main encoder object
+    This class handles the reading of characters from a file and processing them
+    This stores all results in a custom PriorityDict class below
+    """
     def __init__(self, length, reading_file):
-        
         try:
             self.length = int(ceil(length)) #Length arg cast into an int
             if (self.length < 1):
@@ -110,26 +113,16 @@ class PriorityDict(object):
             0, self.reorderable_legend.pop(
                 self._lookup_segment(
                     self.reorderable_legend, segment)))
-    '''
+    
     def __str__(self):
         legend_string = ("Encoded:\t\t" + str(self.numbered) +
                          "\nReordered encoded:\t" + str(self.output) +
                          "\nLegend: " + str(self.legend))
         return legend_string
-'''
+
 class SpacedList(list):
     def __str__(self):
         output = ""
         for value in self:
             output += (str(value) + " ")
         return output
-'''
-TODO List:
-
-Create a makefile
-Look into stringIO
-check empty input
-Write to stdio instead of to a file (makes testing easier) and maybe use a wrapper to print
---> Get clarification of requirements for ANY QUESTIONS
-potential whitespace problems
-'''

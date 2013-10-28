@@ -1,18 +1,10 @@
 '''
-Created on Sep 8, 2013
+Created on Oct 26, 2013
 
 @author: Frank
-'''
-import os
-import string
 
-import mock
-from testify import *
-
-import encoding
-
-'''
-Counting number of tests needed and line numbers of statements where:
+NOTE: Line numbers are all general areas. Currently, numbers shown are about 4 lines before actual conditional
+Counting number of Structured tests needed and line numbers of statements where:
 
 Init 12
 If 16               4
@@ -46,9 +38,17 @@ for 123
 
             Total:  ~21 cases
 '''
+import os
+import string
+
+import mock
+from testify import *
+
+import encoding
+
 class BasisTests(TestCase):
     """
-    Tests the input given in the assignment
+    Tests all conditionals
     """
     @class_setup
     def setUp(self):
@@ -238,15 +238,6 @@ class DataFlowTests(TestCase):
         assert_equals("(1, \'API\') ", str(segment.legend.legend))
         assert_equals("", segment.segment)
 
-    def test_process_char_nondelimiter(self):
-        #if 49 and dataflow
-        segment = encoding.Encoder(3, "blank.txt")
-        segment._process_char('A')
-        assert_equals("A", segment.segment)
-        assert_equals("", str(segment.legend.numbered))
-        assert_equals("", str(segment.legend.output))
-        assert_equals("", str(segment.legend.legend))
-
     def test_process_char_delimiter(self):
         #if 49 and dataflow
         segment = encoding.Encoder(3, "blank.txt")
@@ -328,6 +319,8 @@ class GoodDataTests(TestCase):
     Min/max norm configuration
     Compatability with old Data
     Nominal cases / expected values
+    Everything in here is a "good data" test in addition
+        to anything else listed on each test 
     """
     @class_setup
     def setUp(self):
@@ -349,7 +342,6 @@ class GoodDataTests(TestCase):
         assert_equals("1 2 3 4 5 2 1 2 6 5 2 1 2 7 8 9 ", segment.segment_file())
 
     def test_min_token_size(self):
-        #gooddata
         segment = encoding.Encoder(1, "Input.txt")
         assert_equals("1 2 3 4 5 6 7 2 1 2 8 4 9 7 2 1 2 10 6 11 12 13 ", segment.segment_file())
 
@@ -424,10 +416,23 @@ class ErrorGuessing(TestCase):
     Other things I thought I'd test
     """
 
+    def setUp(self):
+        self.example = open("leftover.txt", "w+")
+        self.example.write("I came, I saw, I left.Z")
+        self.example.close()
+
     def test_non_ascii_file(self):
         #it just isn't equipped to handle this correctly, but possibly should
         segment = encoding.Encoder(3, "nonascii.txt")
         assert_equals("1 2 3 2 4 2 3 5 ", segment.segment_file())
+
+    def test_leftover_segment(self):
+        #Tests that any segments leftover at end of parsing are processed
+        segment = encoding.Encoder(3, "leftover.txt")
+        assert_equals("1 2 3 4 5 2 1 2 6 5 2 1 2 7 8 9 10 ", segment.segment_file())
+
+    def tearDown(self):
+        os.remove("leftover.txt")
 
 if __name__ == "__main__":
     run()
