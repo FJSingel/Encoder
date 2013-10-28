@@ -5,12 +5,13 @@ Created on Sep 8, 2013
 '''
 import os
 
+import mock
 from testify import *
 
 import Encoding
 
 '''
-Counting number of tests needed:
+Counting number of tests needed and line numbers of statements where:
 
 Init 12
 If 16               4
@@ -42,7 +43,7 @@ str 114             1
 str 121             2
 for 123
 
-            Total:  21 cases
+            Total:  ~21 cases
 '''
 class BasisTests(TestCase):
     """
@@ -50,17 +51,125 @@ class BasisTests(TestCase):
     """
     @class_setup
     def setUp(self):
-    	pass
+    	self.blank = open("blank.txt", "w+")
+        self.blank_encoder = Encoding.Encoder(3, "blank.txt")
 
-    def test_regular_use(self):
+    def test_init(self):
+        #init 12
+        segment = Encoding.Encoder(3, "Input.txt")
+
+    def test_init_value_error(self):
+        #if 16 and except 18
+        with assert_raises(ValueError):
+            segment = Encoding.Encoder(-3, "Input.txt")
+
+    def test_init_type_error(self):
+        #except 21
+        with assert_raises(TypeError):
+            segment = Encoding.Encoder('a', "Input.txt")
+
+    def test_segment_normal(self):
+        #segment_file 30
+        segment = Encoding.Encoder(3, "Input.txt")
+        assert_equals("1 2 3 4 5 2 1 2 6 5 2 1 2 7 8 9 ", segment.segment_file())
+        
+    def test_segment_line_loop(self):
+        #for 36 and for 37
+        assert_equals("", self.blank_encoder.segment_file())
+
+    def test_process_char(self):
+        #process_char 43 and if 55
+        segment = Encoding.Encoder(3, "blank.txt")
+        segment._process_char('A')
+        assert_equals("", str(segment.legend.numbered))
+        assert_equals("", str(segment.legend.output))
+        assert_equals("", str(segment.legend.legend))
+        segment._process_char('P')
+        assert_equals("", str(segment.legend.numbered))
+        assert_equals("", str(segment.legend.output))
+        assert_equals("", str(segment.legend.legend))
+        segment._process_char('I')
+        assert_equals("1 ", str(segment.legend.numbered))
+        assert_equals("0 ", str(segment.legend.output))
+        assert_equals("(1, \'API\') ", str(segment.legend.legend))
+
+    def test_process_char_nondelimiter(self):
+        #if 49 
+        #probably dataflow too
+        segment = Encoding.Encoder(3, "blank.txt")
+        segment._process_char('A')
+        assert_equals("A", segment.segment)
+        assert_equals("", str(segment.legend.numbered))
+        assert_equals("", str(segment.legend.output))
+        assert_equals("", str(segment.legend.legend))
+
+    def test_process_char_delimiter(self):
+        #if 49 
+        #probably dataflow too
+        segment = Encoding.Encoder(3, "blank.txt")
+        segment._process_char('.')
+        assert_equals("", segment.segment)
+        assert_equals("1 ", str(segment.legend.numbered))
+        assert_equals("0 ", str(segment.legend.output))
+        assert_equals("(1, \'.\') ", str(segment.legend.legend))
+
+    def test_process_char_full_segment(self):
+        #if 55
+        segment = Encoding.Encoder(3, "blank.txt")
+        segment._process_char('A')
+        segment._process_char('P')
+        segment._process_char('I')
+        assert_equals("", segment.segment)
+        assert_equals("1 ", str(segment.legend.numbered))
+        assert_equals("0 ", str(segment.legend.output))
+        assert_equals("(1, \'API\') ", str(segment.legend.legend))
+
+    def test_add_segment(self):
+        #add_segment 71 if 80 if 83
+        pass
+
+    def test_ordered_dict_init(self):
+        #init 65
+        pass
+
+    def test_add_segment_blank(self):
+        #if 80
+        pass
+
+    def test_add_segment_not_found(self):
+        #if 83
+        pass
+
+    def test_add_segment_is_found(self):
+        #if 83
+        pass
+
+    def test_lookup_default(self):
+        #_lookup_segment 92
+        pass
+
+    def test_lookup_empty(self):
+        #for 98
+        pass
+
+    def test_lookup_match(self):
+        #if 99
+        pass
+
+    def test_prioritize(self):
+        #_prioritize 104
+        pass
+
+    def test_spaced_list_str(self):
+        #__str__ 121
         pass
         
     def tearDown(self):
-        pass
+        os.remove("blank.txt")
 
 class DataFlowTests(TestCase):
     """
-    Do I have any?
+    Calling stuff out of order
     """
     @class_setup
     def setUp(self):
