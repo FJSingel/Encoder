@@ -424,7 +424,7 @@ class ErrorGuessing(TestCase):
     def test_non_ascii_file(self):
         #it just isn't equipped to handle this correctly, but possibly should
         segment = encoding.Encoder(3, "nonascii.txt")
-        assert_equals("1 2 3 2 4 2 3 5 ", segment.segment_file())
+        assert_equals("1 2 3 4 2 5 6 2 3 4 7 ", segment.segment_file())
 
     def test_leftover_segment(self):
         #Tests that any segments leftover at end of parsing are processed
